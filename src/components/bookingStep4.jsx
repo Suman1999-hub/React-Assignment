@@ -42,6 +42,11 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
     name: "",
     phone: "",
   });
+  const [error, setError] = useState({
+    name: "",
+    phone: "",
+    email: "",
+  });
   const [timer, setTimer] = useState(0);
   const [showTimer, setShowTimer] = useState(false);
   const [stripePromise, setStripePromise] = useState(null);
@@ -104,7 +109,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
     try {
       const response = await sendOtpEmailForBooking(payload);
       if (response) {
-        setTimer(60);
+        setTimer(59);
         setShowTimer(true);
       }
       setEmailDot(emailDotFormat(email));
@@ -137,14 +142,57 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
       ...prev,
       [name]: value,
     }));
+    validateField(name, value);
   };
-  const handleBook = async () => {
-    const cardElement = elements.getElement(CardElement);
+  const handleBlur = (name) => {
+    validateField(name, formData[name]);
+  };
 
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: "card",
-      card: cardElement,
-    });
+  // Validate a specific field
+  const validateField = (name, value) => {
+    let newError = { ...error };
+
+    if (value === "") {
+      newError[name] = "*Required";
+    } else {
+      newError[name] = "";
+    }
+
+    setError(newError);
+  };
+  const validForm = () => {
+    console.log(formData);
+    let newError = {};
+    let isValid = true;
+    if (formData.name === "") {
+      newError.name = "*Required";
+      isValid = false;
+    }
+    if (formData.phone === "") {
+      newError.phone = "*Required";
+      isValid = false;
+    }
+    if (email === "") {
+      newError.email = "*Required";
+      isValid = false;
+    }
+    if (Object.keys(newError).length > 0) {
+      setError(newError);
+    }
+    console.log(newError);
+
+    return isValid;
+  };
+
+  const handleBook = async () => {
+    if (!validForm()) {
+      const cardElement = elements.getElement(CardElement);
+
+      const { error, paymentMethod } = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardElement,
+      });
+    }
   };
   return (
     <>
@@ -160,6 +208,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                   <Input
                     placeholder="Enter"
                     name="email"
+                    onBlur={() => handleBlur("email")}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                   {!isVerified ? (
@@ -177,7 +226,13 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                     ) : (
                       <InputGroupText>
                         {showTimer ? (
-                          <Button color="success">{timer}</Button>
+                          timer > 9 ? (
+                            <Button color="info">00:{timer}</Button>
+                          ) : (
+                            <Button color="info" style={{ color: "red" }}>
+                              00:{timer}
+                            </Button>
+                          )
                         ) : (
                           <Button
                             color="primary"
@@ -199,6 +254,9 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                   Enter your email to get 4 digit verification code!
                 </span>
               </FormGroup>
+              {error.email && (
+                <span style={{ color: "red" }}>{error.email}</span>
+              )}
             </Col>
 
             {/* OTP Section */}
@@ -215,7 +273,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                     <Button
                       color="link"
                       onClick={handleVerifyCodeApi}
-                      disabled={isLoading || isVerified}
+                      disabled={isLoading || isVerified || !showTimer}
                       style={{ display: isVerified ? "none" : "inline" }}
                     >
                       {isLoading ? <Spinner size="sm" /> : "Verify"}
@@ -238,9 +296,11 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                   placeholder="Enter"
                   name="name"
                   value={formData.name}
+                  onBlur={() => handleBlur("name")}
                   onChange={(e) => handleChange("name", e.target.value)}
                 />
               </FormGroup>
+              {error.name && <span style={{ color: "red" }}>{error.name}</span>}
             </Col>
 
             {/* Phone Number Section */}
@@ -257,10 +317,14 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                     placeholder="Enter"
                     name="phone"
                     value={formData.phone}
+                    onBlur={() => handleBlur("phone")}
                     onChange={(e) => handleChange("phone", e.target.value)}
                   />
                 </InputGroup>
               </FormGroup>
+              {error.phone && (
+                <span style={{ color: "red" }}>{error.phone}</span>
+              )}
             </Col>
           </Row>
         </CardBody>
@@ -277,7 +341,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                   <span>Agent Fee:</span>
                   <span>
                     <FontAwesomeIcon icon={faDollarSign} />
-                    {reduxStep2Data.agentFee}
+                    {reduxStep2Data?.agentFee}
                   </span>
                 </li>
                 <li>
@@ -314,7 +378,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
           <SvgIcons type={"logArrowLeft"} />
           Previous
         </Button>
-        <Button color="primary" className="ms-auto">
+        <Button color="primary" className="ms-auto" onClick={handleBook}>
           <i className="fa fa-spinner fa-spin mr-2" />
           Book
           <SvgIcons type={"logArrowRight"} />

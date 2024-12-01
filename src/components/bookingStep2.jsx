@@ -27,13 +27,13 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
   const [stateData, setStateData] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
   const allStateData = useSelector((state) => {
     return state?.bookingDataReducer;
   });
   const dispatch = useDispatch();
   console.log("apiData", apiData);
   useEffect(() => {
-    debugger;
     if (allStateData?.step2 && apiData) {
       setSigningType(allStateData?.step2?.signingType);
       setWitnessNumber(allStateData?.step2?.witnessNumber);
@@ -158,7 +158,8 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
 
   console.log(stateData);
   const handleButtonNext = () => {
-    console.log(stateData);
+    debugger;
+    console.log(stateData.length);
     if (!productTypeValidation()) {
       setError("*Required");
       console.log(error);
@@ -188,7 +189,8 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
   };
 
   const productTypeValidation = () => {
-    if (!stateData) {
+    debugger;
+    if (stateData.length === 0) {
       return false;
     }
     return true;
@@ -296,6 +298,8 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
             <Label>Witness Number ($0 per Witness)</Label>
             <Input
               placeholder="Enter"
+              name="witnessNumber"
+              value={witnessNumber}
               onChange={(e) => handleWithnessNumber(e.target.value)}
             />
           </div>

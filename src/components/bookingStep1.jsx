@@ -123,6 +123,7 @@ const BookingStep1 = ({ goNext }) => {
         i === index ? { ...field, [name]: value } : field
       )
     );
+    validateField(name, formFields[index][name], index);
   };
 
   const handleBlur = (event, index) => {

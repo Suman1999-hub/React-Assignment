@@ -6,12 +6,15 @@ import reportWebVitals from "./reportWebVitals";
 
 import { store } from "./redux/store";
 import { Providers } from "./redux/provider";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <Providers store={store}>
       <App />
+      <ToastContainer />
     </Providers>
   </React.StrictMode>
 );

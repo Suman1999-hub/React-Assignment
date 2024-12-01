@@ -57,6 +57,11 @@ export const formatDate = (date, timeZone = null) => {
   // }
 };
 
+export const step3DateFormate = (date) => {
+  if (!date) return "";
+  return moment(date).format("DD/MM/YYYY");
+};
+
 export const formatTime = (date, isTimezone = false) => {
   if (!date) return "";
 
@@ -65,7 +70,7 @@ export const formatTime = (date, isTimezone = false) => {
   //   if (timeZone) date = MomentTimezone.tz(date, timeZone);
   // }
 
-  return moment(date).format("hh:mm a");
+  return moment(date).format("hh:mm");
 };
 
 export const nameFormate = (fullName) => {
@@ -87,4 +92,9 @@ export const emailDotFormat = (email) => {
   }
   splitEmail[0] = resultEmail;
   return splitEmail.join("@");
+};
+
+export const splitDateAndTime = (val) => {
+  const splitDateTime = val.split(" ");
+  return splitDateTime;
 };
