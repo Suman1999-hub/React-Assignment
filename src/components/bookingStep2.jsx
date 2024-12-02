@@ -183,9 +183,17 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
       totalProductValue += curr.productValue;
     });
     console.log({ totalProductValue, witnessNumber });
-    step2.agentFee = (totalProductValue * witnessNumber).toFixed(2);
+    step2.agentFee = Number((totalProductValue * witnessNumber).toFixed(2));
     step2.loanCategories = [...productCategorySet];
-    dispatch(updateBooking({ ...allStateData, step2 }));
+    const step3 = allStateData.step3 ? { ...allStateData.step3 } : null;
+    if (
+      signingType === "Mobile" &&
+      allStateData?.step3 &&
+      allStateData?.step3?.timeZone
+    ) {
+      step3.timeZone = "";
+    }
+    dispatch(updateBooking({ ...allStateData, step2, step3 }));
     goNext();
   };
 

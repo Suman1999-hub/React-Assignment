@@ -55,7 +55,23 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
     timeZone: "",
   });
   const [isTimeZoneDisable, setIsTimeZoneDisable] = useState(false);
+  const [error, setError] = useState({ timeZone: "", location: "", time: "" });
   const dispatch = useDispatch();
+
+  const disablePastDates = (currentDate) => {
+    const today = ReactDatetime.moment().startOf("day");
+    return currentDate.isSameOrAfter(today);
+  };
+
+  const isPastTimes = (currentDate) => {
+    const now = moment();
+    const today = now.clone().startOf("day");
+    if (currentDate.isSame(today, "day")) {
+      return currentDate.isSameOrAfter(now);
+    }
+
+    return true;
+  };
 
   useEffect(() => {
     console.log(reduxStep3Data);
@@ -111,6 +127,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
       ...prev,
       [name]: value,
     }));
+    validateField(name, value);
   };
 
   const isValidDate = (currentDate) => {
@@ -263,24 +280,59 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
     console.log(placeDetails);
   };
 
+  const validateField = (name, value) => {
+    let newError = { ...error };
+
+    if (value === "") {
+      newError[name] = "*Required";
+    } else {
+      newError[name] = "";
+    }
+
+    setError(newError);
+  };
+  const validateForm = () => {
+    let newError = {};
+    let isValid = true;
+    if (reduxStep2Data?.signingType === "Mobile" && !selectPlace) {
+      newError.location = "*Required";
+      isValid = false;
+    }
+    if (reduxStep2Data?.signingType === "RON" && !formFields.timeZone) {
+      newError.timeZone = "*Required";
+      isValid = false;
+    }
+
+    if (Object.keys(newError).length > 0) {
+      setError(newError);
+    }
+    console.log(newError);
+
+    return isValid;
+  };
+
+  console.log(error);
+
   const handleNext = () => {
     console.log(selectPlace);
-    const step3 = {
-      timeZone: formFields.timeZone,
-      appointmentDate:
-        step3DateFormate(formFields.selectedDate) +
-        " " +
-        formatTime(formFields.selectedTime),
-      closingAddress: {
-        line1: selectPlaceObj?.address,
-        city: selectPlaceObj?.city,
-        state: selectPlaceObj?.state,
-        zip: selectPlaceObj?.postal,
-        county: selectPlaceObj?.country,
-      },
-    };
-    dispatch(updateBooking({ ...allStateData, step3 }));
-    goNext();
+    if (validateForm()) {
+      const step3 = {
+        timeZone: formFields.timeZone,
+        appointmentDate:
+          step3DateFormate(formFields.selectedDate) +
+          " " +
+          formatTime(formFields.selectedTime),
+        closingAddress: {
+          line1: selectPlaceObj?.address,
+          city: selectPlaceObj?.city,
+          state: selectPlaceObj?.state,
+          zip: selectPlaceObj?.postal,
+          county: selectPlaceObj?.country,
+        },
+      };
+      dispatch(updateBooking({ ...allStateData, step3 }));
+      goNext();
+    }
   };
   return (
     <>
@@ -300,6 +352,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
                     className="w-full"
                     ref={inputRef1}
                     value={selectPlace}
+                    // onBlur={validateForm}
                     onChange={(e) => googlePlaceSearch(e.target.value)}
                   />
                 </InputGroup>
@@ -317,6 +370,9 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
                   })}
                 </ListGroup>
               </FormGroup>
+              {error.location && (
+                <span style={{ color: "red" }}>{error.location}</span>
+              )}
             </Col>
             <Col md={6}>
               <FormGroup className="searchList">
@@ -329,10 +385,11 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
                       value: formatDate(formFields.selectedDate),
                       readOnly: true,
                     }}
-                    initialValue={new Date()}
+                    // initialValue={new Date()}
+
                     value={formFields.selectedDate}
                     onChange={(value) => handleChange("selectedDate", value)}
-                    isValidDate={isValidDate}
+                    isValidDate={disablePastDates}
                     dateFormat={true}
                     closeOnSelect={true}
                     timeFormat={false}
@@ -350,6 +407,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
                   type="select"
                   name="timeZone"
                   value={formFields.timeZone}
+                  // onBlur={validateForm()}
                   disabled={isTimeZoneDisable}
                   onChange={(e) => handleChange(e.target.name, e.target.value)}
                 >
@@ -361,6 +419,9 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
                   ))}
                 </Input>
               </FormGroup>
+              {error.timeZone && (
+                <span style={{ color: "red" }}>{error.timeZone}</span>
+              )}
             </Col>
             <Col md={6}>
               <FormGroup>
@@ -378,6 +439,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
                   onChange={(value) => handleChange("selectedTime", value)}
                   onClose={() => {}}
                   dateFormat={false}
+                  isValidDate={() => false}
                   timeFormat={true}
                   timeConstraints={{
                     minutes: { min: 0, max: 59, step: 15 },

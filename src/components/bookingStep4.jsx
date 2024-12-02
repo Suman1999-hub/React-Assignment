@@ -228,7 +228,8 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
             ...allStateData.step3,
             agentId: "63997eef2475d90ca5205bd2",
             clientId: "653f8c6d3cea37b5bc3f50c8",
-            totalAmount: Number(totalAmount),
+            totalAmount: 111.09,
+            agentFee: 107.33,
           };
           console.log("payload", payload);
           const bookClosingApiRes = await createBooking(payload);
@@ -243,15 +244,24 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
 
               theme: "light",
             });
-            dispatch(clearBooking());
+            localStorage.removeItem("websiteDetails");
+            dispatch(
+              clearBooking({
+                step1: null,
+                step2: null,
+                step3: null,
+                step4: null,
+              })
+            );
             if (window.history.pushState) {
               var newurl =
                 window.location.protocol +
                 "//" +
                 window.location.host +
                 window.location.pathname +
-                "?tab=1" +
-                window.history.pushState({ path: newurl }, "", newurl);
+                "?tab=1";
+              window.location.href = newurl;
+              //window.history.pushState({ path: newurl }, "", newurl);
             }
           } else {
             toast.error("Payment Fail", {
