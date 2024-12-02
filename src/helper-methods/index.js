@@ -62,6 +62,11 @@ export const step3DateFormate = (date) => {
   return moment(date).format("DD/MM/YYYY");
 };
 
+export const DateFormatestep3 = (date) => {
+  if (!date) return "";
+  return moment(date, "DD/MM/YYYY").format("MMM DD, YYYY");
+};
+
 export const formatTime = (date, isTimezone = false) => {
   if (!date) return "";
 

@@ -182,7 +182,7 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
       step2.loanType.push(curr.productType);
       totalProductValue += curr.productValue;
     });
-    step2.agentFee = (totalProductValue * witnessNumber).toFixed(2);
+    step2.agentFee = Number((totalProductValue * witnessNumber).toFixed(2));
     step2.loanCategories = [...productCategorySet];
     dispatch(updateBooking({ ...allStateData, step2 }));
     goNext();

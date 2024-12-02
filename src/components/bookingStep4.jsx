@@ -18,14 +18,17 @@ import {
 import SvgIcons from "./SvgIcons";
 import { useEffect, useState } from "react";
 import {
+  agentClientAddAndSetDefaultCard,
+  createBooking,
   getDetailsWithEmail,
   sendOtpEmailForBooking,
   verificationForBooking,
 } from "../http/http-calls";
 import { emailDotFormat } from "../helper-methods";
 import { loadStripe } from "@stripe/stripe-js";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { STRIPE_API_KEY } from "../config";
+import { updateBooking } from "../redux/actions";
 
 const BookingStep4 = ({ goPrevious, goNext }) => {
   const reduxStep2Data = useSelector((state) => {
@@ -59,6 +62,11 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
   const reduxStep4Data = useSelector((state) => {
     return state?.bookingDataReducer?.step2;
   });
+  const allStateData = useSelector((state) => {
+    return state?.bookingDataReducer;
+  });
+
+  const dispatch = useDispatch();
   const intializeStrip = () => {
     if (!stripePromise) {
       const stripeRes = loadStripe(STRIPE_API_KEY);
@@ -190,13 +198,44 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
   };
 
   const handleBook = async () => {
-    if (!validForm()) {
+    if (validForm()) {
       const cardElement = elements.getElement(CardElement);
-
-      const { error, paymentMethod } = await stripe.createPaymentMethod({
-        type: "card",
-        card: cardElement,
+      let payload = {};
+      await stripe.createToken(cardElement).then(function (result) {
+        payload = {
+          websiteOwnerId: "63997eef2475d90ca5205bd2",
+          token: result?.token?.id,
+          clientId: "653f8c6d3cea37b5bc3f50c8",
+        };
+        console.log(result.token.id);
       });
+
+      // const step4 = {
+
+      // };
+      // await dispatch(updateBooking({ ...allStateData, step4 }));
+      try {
+        const stripeCardResponse = await agentClientAddAndSetDefaultCard(
+          payload
+        );
+        console.log(stripeCardResponse);
+        if (!stripeCardResponse.error) {
+          const payload = {
+            ...allStateData.step1,
+            ...allStateData.step2,
+            ...allStateData.step3,
+            agentId: "63997eef2475d90ca5205bd2",
+            clientId: "653f8c6d3cea37b5bc3f50c8",
+            totalAmount: Number(totalAmount),
+          };
+          console.log("payload", payload);
+          const bookClosingApiRes = await createBooking(payload);
+          console.log(bookClosingApiRes);
+          //
+        }
+      } catch (err) {
+        console.log("stripe Card Response not found");
+      }
     }
   };
 

@@ -61,11 +61,13 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
     console.log(reduxStep3Data);
     if (reduxStep3Data) {
       const dateTime = splitDateAndTime(reduxStep3Data.appointmentDate);
+
       setFormFields({
-        selectedDate: moment(dateTime, "MM/DD/YYYY"),
+        selectedDate: moment(dateTime, "DD/MM/YYYY").format(),
         selectedTime: moment(dateTime, "DD/MM/YYYY HH:mm"),
         timeZone: reduxStep3Data.timeZone,
       });
+      // console.log(moment(dateTime, "MM/DD/YYYY").format("MMM DD, YYYY"));
       if (
         reduxStep3Data?.closingAddress?.line1 &&
         reduxStep3Data?.closingAddress?.city &&
