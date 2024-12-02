@@ -23,7 +23,7 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
   const [activeTab, setActiveTab] = useState("0");
   const [uniqueCategories, setUniqueCategories] = useState([]);
   const [signingType, setSigningType] = useState("Mobile");
-  const [witnessNumber, setWitnessNumber] = useState("0");
+  const [witnessNumber, setWitnessNumber] = useState(0);
   const [stateData, setStateData] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);

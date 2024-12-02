@@ -40,6 +40,10 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
   const reduxStep3Data = useSelector((state) => {
     return state?.bookingDataReducer?.step3;
   });
+
+  const reduxStep2Data = useSelector((state) => {
+    return state?.bookingDataReducer?.step2;
+  });
   const inputRef1 = useRef(null);
   const [searchedPlaces, setSearchedPlaces] = useState([]);
   const [selectPlace, setSelectPlace] = useState("");
@@ -50,6 +54,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
     selectedTime: "",
     timeZone: "",
   });
+  const [isTimeZoneDisable, setIsTimeZoneDisable] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -79,6 +84,17 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
       }
     }
   }, [reduxStep3Data]);
+
+  const disableTimeZoneOrNot = () => {
+    let isDisable = false;
+    if (reduxStep2Data?.signingType === "Mobile") {
+      isDisable = true;
+    }
+    setIsTimeZoneDisable(isDisable);
+  };
+  useEffect(() => {
+    disableTimeZoneOrNot();
+  }, [reduxStep2Data]);
 
   const handleChange = (name, value) => {
     console.log(name, value);
@@ -325,7 +341,8 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
                   type="select"
                   name="timeZone"
                   value={formFields.timeZone}
-                  onChange={(e) => handleChange(e.target.name, e.target.value)} // Using name attribute
+                  disabled={isTimeZoneDisable}
+                  onChange={(e) => handleChange(e.target.name, e.target.value)}
                 >
                   <option value="">Select</option>
                   {timezoneList().map((item, index) => (
@@ -349,7 +366,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
                     readOnly: true,
                   }}
                   value={formFields.selectedTime}
-                  onChange={(value) => handleChange("selectedTime", value)} // Corrected
+                  onChange={(value) => handleChange("selectedTime", value)}
                   onClose={() => {}}
                   dateFormat={false}
                   timeFormat={true}

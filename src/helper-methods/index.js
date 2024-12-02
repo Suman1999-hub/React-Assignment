@@ -70,7 +70,7 @@ export const formatTime = (date, isTimezone = false) => {
   //   if (timeZone) date = MomentTimezone.tz(date, timeZone);
   // }
 
-  return moment(date).format("hh:mm");
+  return moment(date).format("HH:mm");
 };
 
 export const nameFormate = (fullName) => {

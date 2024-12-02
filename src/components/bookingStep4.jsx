@@ -49,11 +49,16 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
   });
   const [timer, setTimer] = useState(0);
   const [showTimer, setShowTimer] = useState(false);
+  const [processingFee, setProcessingFee] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [stripePromise, setStripePromise] = useState(null);
   const [stripeClientSec, setStripeClientSec] = useState("");
   const stripe = useStripe();
   const elements = useElements();
 
+  const reduxStep4Data = useSelector((state) => {
+    return state?.bookingDataReducer?.step2;
+  });
   const intializeStrip = () => {
     if (!stripePromise) {
       const stripeRes = loadStripe(STRIPE_API_KEY);
@@ -194,6 +199,13 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
       });
     }
   };
+
+  useEffect(() => {
+    const pFee = Number(reduxStep4Data?.agentFee) * (3.5 / 100);
+    setProcessingFee(pFee.toFixed(2));
+    const amountTotal = Number(reduxStep4Data?.agentFee) + pFee;
+    setTotalAmount(amountTotal.toFixed(2));
+  }, [reduxStep4Data?.agentFee]);
   return (
     <>
       <Card className="stepCard">
@@ -348,14 +360,14 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                   <span>Processing Fee:</span>
                   <span>
                     <FontAwesomeIcon icon={faDollarSign} />
-                    $1.76
+                    {processingFee}
                   </span>
                 </li>
                 <li>
                   <span>Total:</span>
                   <span>
                     <FontAwesomeIcon icon={faDollarSign} />
-                    $52.09
+                    {totalAmount}
                   </span>
                 </li>
               </ul>
