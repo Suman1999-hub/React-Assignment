@@ -28,7 +28,8 @@ import { emailDotFormat } from "../helper-methods";
 import { loadStripe } from "@stripe/stripe-js";
 import { useDispatch, useSelector } from "react-redux";
 import { STRIPE_API_KEY } from "../config";
-import { updateBooking } from "../redux/actions";
+import { clearBooking, updateBooking } from "../redux/actions";
+import { toast } from "react-toastify";
 
 const BookingStep4 = ({ goPrevious, goNext }) => {
   const reduxStep2Data = useSelector((state) => {
@@ -67,6 +68,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
   });
 
   const dispatch = useDispatch();
+
   const intializeStrip = () => {
     if (!stripePromise) {
       const stripeRes = loadStripe(STRIPE_API_KEY);
@@ -230,6 +232,39 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
           };
           console.log("payload", payload);
           const bookClosingApiRes = await createBooking(payload);
+          if (!bookClosingApiRes?.error) {
+            toast.success("Successfully Booking", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+
+              theme: "light",
+            });
+            dispatch(clearBooking());
+            if (window.history.pushState) {
+              var newurl =
+                window.location.protocol +
+                "//" +
+                window.location.host +
+                window.location.pathname +
+                "?tab=1" +
+                window.history.pushState({ path: newurl }, "", newurl);
+            }
+          } else {
+            toast.error("Payment Fail", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+
+              theme: "light",
+            });
+          }
           console.log(bookClosingApiRes);
           //
         }
@@ -241,9 +276,9 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
 
   useEffect(() => {
     const pFee = Number(reduxStep4Data?.agentFee) * (3.5 / 100);
-    setProcessingFee(pFee.toFixed(2));
+    setProcessingFee(pFee);
     const amountTotal = Number(reduxStep4Data?.agentFee) + pFee;
-    setTotalAmount(amountTotal.toFixed(2));
+    setTotalAmount(amountTotal);
   }, [reduxStep4Data?.agentFee]);
   return (
     <>

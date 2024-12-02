@@ -83,6 +83,13 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
             ", " +
             reduxStep3Data?.closingAddress?.county
         );
+        setSelectPlaceObj({
+          address: reduxStep3Data?.closingAddress?.line1,
+          city: reduxStep3Data?.closingAddress?.city,
+          state: reduxStep3Data?.closingAddress?.state,
+          postal: reduxStep3Data?.closingAddress?.zip,
+          country: reduxStep3Data?.closingAddress?.county,
+        });
       }
     }
   }, [reduxStep3Data]);

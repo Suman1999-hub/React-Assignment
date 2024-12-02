@@ -36,7 +36,7 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
   useEffect(() => {
     if (allStateData?.step2 && apiData) {
       setSigningType(allStateData?.step2?.signingType);
-      setWitnessNumber(allStateData?.step2?.witnessNumber);
+      setWitnessNumber(allStateData?.step2?.witnessCount);
       let stateArray = [];
       apiData?.forEach((curr) => {
         const currentProductType = curr.productType;
@@ -182,7 +182,8 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
       step2.loanType.push(curr.productType);
       totalProductValue += curr.productValue;
     });
-    step2.agentFee = Number((totalProductValue * witnessNumber).toFixed(2));
+    console.log({ totalProductValue, witnessNumber });
+    step2.agentFee = (totalProductValue * witnessNumber).toFixed(2);
     step2.loanCategories = [...productCategorySet];
     dispatch(updateBooking({ ...allStateData, step2 }));
     goNext();
