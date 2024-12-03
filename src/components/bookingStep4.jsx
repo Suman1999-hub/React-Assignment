@@ -30,6 +30,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { STRIPE_API_KEY } from "../config";
 import { clearBooking, updateBooking } from "../redux/actions";
 import { toast } from "react-toastify";
+import Successfull from "./Successfull";
 
 const BookingStep4 = ({ goPrevious, goNext }) => {
   const reduxStep2Data = useSelector((state) => {
@@ -56,9 +57,14 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
   const [processingFee, setProcessingFee] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
   const [stripePromise, setStripePromise] = useState(null);
-  const [stripeClientSec, setStripeClientSec] = useState("");
+  const [isOpenModal, setIsOpenModal] = useState(false);
+
   const stripe = useStripe();
   const elements = useElements();
+
+  const _toggleModal = (isOpenModal = false) => {
+    setIsOpenModal(isOpenModal);
+  };
 
   const reduxStep4Data = useSelector((state) => {
     return state?.bookingDataReducer?.step2;
@@ -163,7 +169,6 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
     validateField(name, formData[name]);
   };
 
-  // Validate a specific field
   const validateField = (name, value) => {
     let newError = { ...error };
 
@@ -211,11 +216,6 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
         };
         console.log(result.token.id);
       });
-
-      // const step4 = {
-
-      // };
-      // await dispatch(updateBooking({ ...allStateData, step4 }));
       try {
         const stripeCardResponse = await agentClientAddAndSetDefaultCard(
           payload
@@ -228,11 +228,14 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
             ...allStateData.step3,
             agentId: "63997eef2475d90ca5205bd2",
             clientId: "653f8c6d3cea37b5bc3f50c8",
-            totalAmount: 111.09,
-            agentFee: 107.33,
+            totalAmount: Number(totalAmount.toFixed(2)),
           };
           console.log("payload", payload);
           const bookClosingApiRes = await createBooking(payload);
+          if (!bookClosingApiRes.error) {
+            setIsOpenModal(true);
+          }
+
           if (!bookClosingApiRes?.error) {
             toast.success("Successfully Booking", {
               position: "top-right",
@@ -244,25 +247,8 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
 
               theme: "light",
             });
-            localStorage.removeItem("websiteDetails");
-            dispatch(
-              clearBooking({
-                step1: null,
-                step2: null,
-                step3: null,
-                step4: null,
-              })
-            );
-            if (window.history.pushState) {
-              var newurl =
-                window.location.protocol +
-                "//" +
-                window.location.host +
-                window.location.pathname +
-                "?tab=1";
-              window.location.href = newurl;
-              //window.history.pushState({ path: newurl }, "", newurl);
-            }
+
+            dispatch(clearBooking());
           } else {
             toast.error("Payment Fail", {
               position: "top-right",
@@ -444,14 +430,14 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                   <span>Processing Fee:</span>
                   <span>
                     <FontAwesomeIcon icon={faDollarSign} />
-                    {processingFee}
+                    {processingFee?.toFixed(2)}
                   </span>
                 </li>
                 <li>
                   <span>Total:</span>
                   <span>
                     <FontAwesomeIcon icon={faDollarSign} />
-                    {totalAmount}
+                    {totalAmount?.toFixed(2)}
                   </span>
                 </li>
               </ul>
@@ -480,6 +466,10 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
           <SvgIcons type={"logArrowRight"} />
         </Button>
       </div>
+
+      {isOpenModal && (
+        <Successfull isOpen={isOpenModal} toggle={() => _toggleModal()} />
+      )}
     </>
   );
 };

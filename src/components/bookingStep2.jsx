@@ -65,7 +65,7 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
       );
       const rawData = getStandardFeesApiRes?.agent?.standardFees || [];
       const uniqueData = processApiData(rawData);
-      // console.log(uniqueData);
+      console.log(getStandardFeesApiRes);
       setApiData(rawData);
       setUniqueCategories(uniqueData);
     } catch (error) {
@@ -183,7 +183,9 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
       totalProductValue += curr.productValue;
     });
     console.log({ totalProductValue, witnessNumber });
-    step2.agentFee = Number((totalProductValue * witnessNumber).toFixed(2));
+    step2.agentFee = Number(
+      (totalProductValue + 67 * witnessNumber).toFixed(2)
+    );
     step2.loanCategories = [...productCategorySet];
     const step3 = allStateData.step3 ? { ...allStateData.step3 } : null;
     if (
@@ -198,7 +200,6 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
   };
 
   const productTypeValidation = () => {
-    debugger;
     if (stateData.length === 0) {
       return false;
     }
@@ -304,7 +305,7 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
           {error && <span style={{ color: "red" }}>{error}</span>}
 
           <div className="formGroup mt-4">
-            <Label>Witness Number ($0 per Witness)</Label>
+            <Label>Witness Number ($67 per Witness)</Label>
             <Input
               placeholder="Enter"
               name="witnessNumber"

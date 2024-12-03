@@ -282,7 +282,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
 
   const validateField = (name, value) => {
     let newError = { ...error };
-
+    console.log(value);
     if (value === "") {
       newError[name] = "*Required";
     } else {
@@ -291,16 +291,43 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
 
     setError(newError);
   };
+  useEffect(() => {
+    validateForm();
+  }, [formFields]);
   const validateForm = () => {
     let newError = {};
     let isValid = true;
     if (reduxStep2Data?.signingType === "Mobile" && !selectPlace) {
       newError.location = "*Required";
       isValid = false;
+    } else {
+      newError.location = "";
     }
     if (reduxStep2Data?.signingType === "RON" && !formFields.timeZone) {
       newError.timeZone = "*Required";
       isValid = false;
+    }
+    if (!formFields.selectedTime) {
+      newError.selectedTime = "*Required";
+      isValid = false;
+    }
+    if (formFields?.selectedDate && formFields?.selectedTime) {
+      const dateTime =
+        moment(formFields?.selectedDate).format("DD/MM/YYYY") +
+        " " +
+        formatTime(formFields.selectedTime);
+
+      // if(!moment().isAfter(moment(dateTime,"DD/MM/YYYY HH:mm"))){
+      console.log();
+      if (moment().isAfter(moment(dateTime, "DD/MM/YYYY HH:mm"))) {
+        newError.selectedTime = "You can not select past time";
+        isValid = false;
+      } else {
+        newError.selectedTime = "";
+      }
+
+      // }
+      console.log(dateTime);
     }
 
     if (Object.keys(newError).length > 0) {
@@ -350,9 +377,9 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
                   <Input
                     placeholder="Search"
                     className="w-full"
+                    name="location"
                     ref={inputRef1}
                     value={selectPlace}
-                    // onBlur={validateForm}
                     onChange={(e) => googlePlaceSearch(e.target.value)}
                   />
                 </InputGroup>
@@ -446,6 +473,9 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
                   }}
                 />
               </FormGroup>
+              {error.selectedTime && (
+                <span style={{ color: "red" }}>{error.selectedTime}</span>
+              )}
             </Col>
           </Row>
         </CardBody>
